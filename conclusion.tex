@@ -1,0 +1,101 @@
+\chapter{Conclusions and Future Work}
+\label{ch:conc}
+
+To conclude this dissertation, we present a summary of the results and analysis delivered in the
+previous chapter followed by an outlook for future work based on the preliminary endeavors
+undertaken here. The ultimate research goal achieved in this work as well as the complementary 
+objectives met along the way serve to contribute to the body of knowledge regarding hybrid methods
+for neutral particle radiation transport in shielding and deep penetration applications.
+
+\section{Summary and Conclusions}
+
+In this work, the LDO equations were implemented in the Exnihilo parallel neutral particle 
+radiation transport framework for the purpose of using the equations' solutions in Monte Carlo
+variance reduction parameter generation via the ADVANTG software to improve the results of
+simulations run with MCNP5. A small variety of test case scenarios were examined in the CADIS and
+\fwc\ contexts with biasing parameters generated from flux solutions of different quadrature 
+types to ascertain the LDO solutions' performance relative to unbiased Monte Carlo calculations 
+as well as those with biasing parameters from standard quadrature types.
+
+Deterministically-calculated forward and adjoint scalar flux solutions from the LDO equations 
+were found to be comparable to those of standard quadrature types. The LDO equations saw their
+best-performing Monte Carlo biasing parameters in the \fwc\ context. For the DLVN experimental
+benchmark, LDO variance reduction parameters generated the highest Figures of Merit for two of the
+six detector locations in the assembly. Of those studied here, the only other quadrature type to
+achieve this was the QR quadrature set. In the case of the simplified portal monitor scenario
+studied in the \fwc\ context, the LDO biasing parameters attained the highest FOM values for three
+out of four detector locations. Considering results from the test case scenarios in which neutrons
+were transported using the CADIS and \fwc\ methods, we suggest a coarse angular mesh for Monte 
+Carlo variance reduction parameter generation based on flux solutions resultant from solving the 
+LDO equations. For photon transport problems, a more refined LDO angular mesh is recommended for
+generating Monte Carlo biasing parameters and achieving detector responses with high Figures of
+Merit.
+
+In general, the LDO formulation is most useful in the specific context of Monte Carlo variance
+parameter generation using the \fwc\ method for photon transport problems. It is also effective in
+the \fwc\ method for neutron transport problems, though somewhat less so. However, the LDO
+representation is currently limited in applicability by its current implementation in the Exnihilo
+framework and the ADVANTG software. The problem space available to explore is limited to those 
+with vacuum boundary conditions and isotropic fixed particle sources with non-zero volume.
+Adopting the LDO formulation in another radiation transport and Monte Carlo variance reduction
+parameter generation framework would be of interest if the framework is flexible in allowing for
+asymmetric quadrature sets to be used and if the framework allows for relative ease in 
+implementing the unique features of the LDO representation such as interpolation in angle.
+
+To conclude, we note that the novel work towards this dissertation includes the implementation of
+the LDO equations in a radiation transport framework as well as the study of the resultant scalar
+flux solutions' efficacy in Monte Carlo variance parameter generation in both the CADIS and \fwc\
+methods. The results and analysis presented here are of interest to the community at large in that
+the LDO representation treats particle scattering differently than the traditional discrete
+ordinates formulation and incorporates angular information into scalar flux solutions
+in a new way. This improves the performance of hybrid methods in shielding problems with highly 
+anisotropic particle movement and particle streaming pathways when using the \fwc\ method, 
+especially for photon transport problems.
+
+\section{Future Work}
+
+Various avenues of future work have become apparent over the course of this work. Some 
+facets of investigation are more rudimentary and concern details regarding the implementation of
+the LDO equations in a radiation transport software framework, while others are more
+research-oriented questions.
+
+We will first discuss suggested future work that concerns implementation details and studies that
+may follow. As reflective boundary conditions are commonly used in both deterministic and Monte
+Carlo transport methods to reduce problem space and compute time, one of the first next steps to
+take would be to enable the use of reflective boundary conditions with the LDO equations in
+Denovo. This is less straightforward than for standard quadrature types because of the LDO
+equations' asymmetry in angle, but it should be possible using the interpolation property of the 
+LDO representation. In a similar vein, enabling the use of analytic approximations of uncollided 
+flux sources in combination with solving the LDO equations in Denovo would be a next logical 
+development. This would enable the direct use of point sources when solving the LDO equations
+through the Exnihilo framework and help to mitigate the ray effects from the point sources in the
+resultant flux solutions.
+
+Modifying the ADVANTG software to support more variety in deterministic calculations and Monte
+Carlo variance parameter generation would open doors for more interesting studies with the LDO
+equations as well as standard quadrature types. Specifically, implementing the use of anisotropic
+particle sources would allow for studies involving commonly-used directional particle sources such
+as beams. Additionally, generalizing the \fwco\ methods implemented in the ADVANTG
+software such that quadrature sets that are not rotationally symmetric could be directly used in 
+concert with the methods would bring about an additional channel for capturing the LDO equations'
+unique scattering treatment in angle-informed scalar flux solutions used to generate Monte Carlo 
+biasing parameters. Currently, the LDO equations' deterministic flux solutions could be used in 
+combination with the \fwco\ methods with the use of the interpolation property of
+the LDO equations. This interpolation functionality does not exist in either the Exnihilo
+framework or the ADVANTG software at the time of this writing.
+
+Broader research questions involving solving the LDO equations are of interest as well. The test
+case scenarios in this work were limited to relatively small scales with respect to computational
+hardware usage; studies with finer LDO angular meshes across larger hardware configurations would
+be instructive to see at what subspace degree, if any, the LDO equations' flux solutions mitigate 
+ray effects in relevant real-world scenarios. Additionally, we suggest testing rotated versions 
+of the LDO quadrature sets to study the relationship between ordinate placement and problem 
+geometry in detector response and FOM production. This would be a fairly straightforward next 
+step; the point sets generated by Womersley used in this work are rotationally invariant and the 
+Exnihilo framework imports the LDO quadrature sets from plain text files. So, rotation matrices or
+formulae could be applied to the already-existing LDO point sets with the new rotated quadratures 
+directly input to Exnihilo (and ADVANTG) for study in deterministic calculations as well as in 
+Monte Carlo variance reduction parameter generation. As an alternative to conducting studies with
+increased angular resolution, we suggest undertaking investigations that use the interpolatory
+nature of the LDO representation once this ability has been realized in the various software
+frameworks involved.

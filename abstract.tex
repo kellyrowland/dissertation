@@ -1,0 +1,28 @@
+% (This file is included by thesis.tex; you do not latex it by itself.)
+
+\begin{abstract}
+
+Neutral particle radiation transport simulations are critical for radiation shielding and deep
+penetration applications. Arriving at a solution for a given response of interest can be 
+computationally difficult because of the magnitude of particle attenuation often seen in these 
+shielding problems. Hybrid methods, which aim to synergize the individual favorable aspects of
+deterministic and stochastic solution methods for solving the steady-state neutron transport
+equation, are commonly used in radiation shielding applications to achieve statistically
+meaningful results in a reduced amount of computational time and effort. The current state of the
+art in hybrid calculations is the Consistent Adjoint-Driven Importance Sampling (CADIS) and 
+Forward-Weighted CADIS (\fwc) methods, which generate Monte Carlo variance reduction parameters
+based on deterministically-calculated scalar flux solutions. For certain types of radiation
+shielding problems, however, results produced using these methods suffer from unphysical
+oscillations in scalar flux solutions that are a product of angular discretization. These 
+aberrations are termed ``ray effects''.
+
+The Lagrange Discrete Ordinates (LDO) equations retain the formal structure of the traditional
+discrete ordinates formulation of the neutron transport equation and mitigate ray effects at high
+angular resolution. In this work, the LDO equations have been implemented in the Exnihilo parallel
+neutral particle radiation transport framework, with the deterministic scalar flux solutions
+passed to the Automated Variance Reduction Generator (ADVANTG) software and the resultant Monte
+Carlo variance reduction parameters' efficacy assessed based on results from MCNP5. Studies were 
+conducted in both the CADIS and \fwc\ contexts, with the LDO equations' variance reduction
+parameters seeing their best performance in the \fwc\ method, especially for photon transport.
+
+\end{abstract}

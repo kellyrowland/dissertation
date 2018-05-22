@@ -1,0 +1,149 @@
+\chapter{Introduction}
+
+The work covered in this dissertation includes the implementation of the Lagrange 
+Discrete Ordinates (LDO) equations in the Exnihilo parallel neutral particle radiation 
+transport framework for the purpose of using the equations' solutions in Monte Carlo
+variance reduction parameter generation via the ADVANTG software to improve the results of
+simulations run with MCNP5. We start with an analysis of deterministic 
+scalar flux results from solving the LDO equations
+compared against those of standard discrete ordinates quadrature set types because the 
+LDO equations have never before been implemented in a framework such as Exnihilo. Then,
+we assess the performance of the Monte Carlo variance reduction parameters generated 
+based on the forward and adjoint solutions from the various quadrature set types in the contexts
+of both the Consistent Adjoint-Driven Importance Sampling (CADIS) and the Forward-Weighted 
+CADIS (\fwc) methods.
+
+\section{Motivation}
+
+Radiation shielding is an important and interesting problem from various perspectives.
+Simulation of shielding scenarios is critical for health physics and nuclear security
+applications, but arriving at a solution for a given response of interest (e.g., 
+neutron flux at a given location) can be computationally difficult in the context of
+the magnitude of particle attenuation often seen in shielding problems.
+
+The steady-state neutron transport equation (NTE), introduced below in Section
+\ref{sec:nte}, is typically solved using either deterministic methods or stochastic
+(Monte Carlo) methods. We will look at each of these solution methods in further 
+detail in Chapter \ref{bgch}, but briefly note here that both solution methods have
+individual strengths and weaknesses. So-called ``hybrid'' methods aim to combine the
+favorable aspects of deterministic and Monte Carlo methods to achieve better results.
+Although hybrid methods are used to significant effect in radiation shielding problems,
+they do not entirely mitigate the negative aspects of the combined simulation types.
+
+One particular area of study where hybrid methods tend to fall short is in shielding
+problems with highly anisotropic particle movement and particle streaming pathways.
+This is because the standard implementation of the CADIS and \fwc\ methods is based on scalar
+particle flux rather than angular particle flux. So, solutions from deterministic calculations
+exclude information about how particles move toward a response of interest.
+For problems with strong anisotropies in the particle flux, the importance map and biased source 
+developed using the standard space/energy treatment may not represent the real importance well 
+enough to sufficiently improve efficiency in the Monte Carlo calculation. 
+
+This work aims to gauge the performance of Monte Carlo biasing parameters based on
+scalar flux solutions from solving the LDO equations. We will be employing the LDO equations'
+solutions in the standard CADIS and \fwc\ methods to assess how well the LDO representation's
+unique treatment of scattering and asymmetry in angle incorporate angular information into the
+resultant scalar flux solutions and corresponding Monte Carlo biasing parameters.
+
+\section{Goals and Impacts}
+\label{goals}
+
+The primary goal of this work is to assess the forward and adjoint scalar flux 
+solutions of the Lagrange Discrete Ordinates equations as input for Monte Carlo 
+variance reduction parameter generation in the contexts of the CADIS and \fwc\ methods.
+Additional research objectives in support of the primary goal for this work include:
+
+\begin{itemize}
+\item{Implement the LDO equations in a neutral particle radiation transport framework 
+      designed to solve the traditional discrete ordinates form of the NTE.}
+\item{Choose a small variety of test cases in which to assess the various quadrature
+      types' deterministic scalar flux solutions for efficacy in Monte Carlo variance reduction 
+      parameter generation.}
+\item{Compare forward and adjoint scalar flux solutions resultant from the LDO
+      equations against those generated with standard discrete ordinates quadrature
+      sets for the chosen test scenarios.}
+\item{Test the impact of biasing parameters' angular mesh refinement on Monte Carlo results
+      across various quadrature types.}
+\end{itemize}
+
+\noindent In meeting these objectives as progress towards accomplishing the primary research goal,
+we verify the relative accuracy of the deterministic solutions of the LDO equations and then 
+examine how they perform as the deterministic solver for hybrid methods. The test problems used 
+are those that challenge hybrid methods in general, and so we have generated
+a variety of results of interest to the community at large.
+
+\section{The Neutron Transport Equation}
+\label{sec:nte}
+
+The way in which neutrons move, known as ``neutron transport", is governed by the
+time-dependent neutron transport equation (NTE) \cite{dude}:
+
+\begin{multline}
+\frac{1}{v}\frac{\del}{\del t}\psi(\vecr,E,\bo,t) +  \bo \cdot \nabla \psi(\vecr,E,\bo,t) + 
+\Sigma_t(\vecr,E) \psi(\vecr,E,\bo,t) =  \\
+\int_0^\infty\int_{4\pi} \Sigma_s(\vecr,E'\rightarrow E,\bo'\cdot\bo)
+\psi(\vecr,E',\bo',t)d\bo'dE' + Q(\vecr,E,\bo,t),
+\label{eq:tnte}
+\end{multline}
+
+\noindent where $\vecr$ is the neutron position, $E$ is the energy of the neutron,
+$\bo$ is the direction of travel of the neutron, and $t$ is the time. The combination of 
+$(\vecr,E,\bo,t)$ is generally referred to as the ``phase space'' of the particles. $\psi$ 
+denotes angular neutron flux, $\Sigma$ represents the cross section of a material, and $Q$ is
+any additional source (fission, a fixed source, etc.) of neutrons.
+
+We are often interested in situations in which the particle flux is not a function of time. In
+these cases, we solve the time-independent (steady-state) neutron transport equation, written as
+
+\begin{multline}
+\bo \cdot \nabla \psi(\vecr,E,\bo) + \Sigma_t(\vecr,E) \psi(\vecr,E,\bo) =  \\
+\int_0^\infty\int_{4\pi} \Sigma_s(\vecr,E'\rightarrow E,\bo'\cdot\bo)
+\psi(\vecr,E',\bo')d\bo'dE' + Q(\vecr,E,\bo).
+\label{eq:nte}
+\end{multline}
+
+The steady-state neutron transport equation can be thought of as a balance equation in 
+which the neutron losses represented on the left-hand side of the equation are equal to
+the neutron gains represented on the right-hand side of the equation \cite{dude}. The 
+first term on the left-hand side of the steady-state NTE accounts for all neutrons lost by 
+streaming out through the surface of the system being considered. The second term in 
+the left-hand side of the steady-state NTE accounts for all neutrons 
+lost to collisions; this includes neutrons lost via absorption as well as neutrons that
+exit the phase space of interest by scattering into a different energy and angle. The 
+right-hand side of the equation totals system gains by summing up all neutrons that 
+scatter into the phase space of interest from different energies and angles along with 
+neutrons created from the source. The scattering term depends not on the individual
+angles $\bo$ and $\bo'$ but on their dot product.
+
+The derivative in the first term of the steady-state NTE suggests that we must prescribe 
+appropriate boundary conditions for the equation in order to solve the problem. The boundary
+conditions depend on the given problem of interest and will be discussed in more detail later.
+The following chapter will provide in-depth explanations of various solution methods 
+for the time-independent NTE.
+
+\section{Dissertation Outline}
+
+The remainder of this dissertation is structured so as to provide a relevant theoretical
+background and discussion as a prelude to the eventual presentation of the results and analysis
+arrived at in meeting the sundry and ultimate objectives listed above in Section \ref{goals}.
+Chapter \ref{bgch} provides a theoretical basis of the foundation of solution methods for the
+NTE, followed by a discussion of pertinent work in the area of hybrid methods. Specific attention
+is given to developments that aimed to incorporate angular information into Monte Carlo biasing
+parameters; we will see in Section \ref{sec:ldo} that the interest in using the LDO equations'
+solutions for Monte Carlo variance reduction parameter generation stems from the unique way in
+which the LDO equations treat particle scattering.
+
+Transitioning from theory to practice, Chapter \ref{ch:method} examines the
+traditional discrete ordinates equations and the LDO equations from the
+perspective of implementing both sets of  equations in a neutral particle
+radiation transport software framework. Specific focus is given on the
+differences in implementing the contrasting equations; a discussion of details
+regarding the solution of the LDO equations in a framework designed to solve the
+conventional discrete ordinates equations concludes the chapter.  We note that
+the discussion in Chapters \ref{bgch} and \ref{ch:method} focuses on neutron
+transport, but the solution methods can be leveraged for photon transport as
+well; Chapter \ref{sec:results} presents the test case scenarios examined in
+this work with results from the various hybrid methodologies for both neutron
+and photon transport problems. Chapter  \ref{ch:conc} concludes the dissertation
+with a summary review of the results and  analysis followed by a brief
+discussion of future work paths.
